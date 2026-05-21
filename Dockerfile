@@ -24,12 +24,15 @@ RUN mkdir -p /etc/pleroma \
     && chown -R pleroma ${DATA}
 
 USER pleroma
+
 WORKDIR /pleroma
 
-RUN git clone -b develop https://git.pleroma.social/pleroma/pleroma.git /pleroma \
-    && git checkout ${PLEROMA_VER}
+RUN git clone -b develop https://git.pleroma.social/pleroma/pleroma.git app
 
-RUN echo "import Mix.Config" > config/prod.secret.exs \
+WORKDIR /pleroma/app
+
+RUN git checkout ${PLEROMA_VER} \
+    && echo "import Mix.Config" > config/prod.secret.exs \
     && mix local.hex --force \
     && mix local.rebar --force \
     && mix deps.get --only prod \
@@ -40,4 +43,4 @@ COPY --chown=pleroma --chmod=640 ./config.exs /etc/pleroma/config.exs
 
 EXPOSE 4000
 
-ENTRYPOINT ["/pleroma/docker-entrypoint.sh"]
+ENTRYPOINT ["/pleroma/app/docker-entrypoint.sh"]
